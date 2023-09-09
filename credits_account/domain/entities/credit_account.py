@@ -15,7 +15,7 @@ class CreditAccount:
         self._id = company_id
         self._credit_state_list: List[CreditTransaction] = credit_state_list
         self._reference_date: date = reference_date
-        self._transactions: List[CreditTransaction] = []
+        self._transactions: List[CreditTransaction] = [*credit_state_list]
 
     @staticmethod
     def restore(
@@ -53,10 +53,10 @@ class CreditAccount:
             CreditMovement(
                 value,
                 "ADD",
-                uuid1(),
                 value,
                 description,
-                uuid1(),
+                None,
+                None,
             )
         )
         self._credit_state_list.append(credit_state)
@@ -68,15 +68,12 @@ class CreditAccount:
             movement = CreditMovement(
                 value - not_consumed_credit,
                 "CONSUME",
-                uuid1(),
                 value,
                 description,
-                uuid1(),
+                None,
+                None,
             )
             transaction.register_movement(movement)
-            self._transactions.append(
-                transaction
-            )  # TODO: verify if it's needed because of reference system
             if not_consumed_credit:
                 break
 

@@ -63,10 +63,10 @@ class InMemoryCreditAccountRepository:
 
     @staticmethod
     def populate(
-        credit_account_rows: List[CreditAccountRow] = [],
-        credit_rows: List[CreditRow] = [],
-        credit_logs_rows: List[CreditLogRow] = [],
-        operation_logs_rows: List[OperationLogRow] = [],
+        credit_account_rows: List[CreditAccountRow],
+        credit_rows: List[CreditRow],
+        credit_logs_rows: List[CreditLogRow],
+        operation_logs_rows: List[OperationLogRow],
     ) -> "InMemoryCreditAccountRepository":
         repo = InMemoryCreditAccountRepository()
         InMemoryCreditAccountRepository._add_to_field(
@@ -146,8 +146,9 @@ class InMemoryCreditAccountRepository:
     def add_credits(self, account: CreditAccount) -> None:
         now = datetime.now()
         for credit in account._transactions:
-            if not credit.id:
-                credit.id = uuid1()
+            if credit.id:
+                continue
+            credit.id = uuid1()
             credit_row = CreditRow(
                 created_at=now,
                 updated_at=now,
@@ -190,4 +191,35 @@ class InMemoryCreditAccountRepository:
                 self.operation_logs_rows[operation_log.id] = operation_log
 
     def consume_credits(self, account: CreditAccount) -> None:
-        ...
+        now = datetime.now()
+        for credit in account._transactions:
+            if not credit.id or not credit.get_consumed_value():
+                continue
+            for use in credit.get_consumed_movements():
+                if not use.id:
+                    use.id = uuid1()
+                if not use.operation_id:
+                    use.operation_id = uuid1()
+                credit_log = CreditLogRow(
+                    created_at=now,
+                    updated_at=now,
+                    credit_moviment=use.credit_movement,
+                    account_id=account.get_id(),
+                    credit_id=credit.id,
+                    operation_id=use.operation_id,
+                    id=use.id,
+                )
+                self.credit_logs_rows[credit_log.id] = credit_log
+                operation_log = OperationLogRow(
+                    created_at=now,
+                    updated_at=now,
+                    owner_id=uuid1(),  # TODO: find a way to get it from input
+                    description=use.operation_log,
+                    total_movement=use.operation_movement,
+                    operation=use.operation_type,
+                    account_id=account.get_id(),
+                    id=use.operation_id,
+                    object_type="",  # TODO: find a way to get it from input
+                    object_id="",  # TODO: find a way to get it from input
+                )
+                self.operation_logs_rows[operation_log.id] = operation_log

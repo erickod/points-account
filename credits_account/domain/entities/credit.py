@@ -22,10 +22,10 @@ class CreditLog:
 class CreditMovement:
     credit_movement: int
     operation_type: str
-    operation_id: uuid.UUID
     operation_movement: int
     operation_log: str
-    id: uuid.UUID
+    operation_id: Optional[uuid.UUID] = None
+    id: Optional[uuid.UUID] = None
 
     def __post_init__(self) -> None:
         if (
@@ -33,6 +33,7 @@ class CreditMovement:
             and self.credit_movement > 0
         ):
             self.credit_movement = self.credit_movement * -1
+            self.operation_movement = self.operation_movement * -1
 
     def __int__(self) -> int:
         return self.credit_movement
@@ -104,13 +105,22 @@ class CreditTransaction:
         if next_month >= 13:
             next_month = 1
             next_year += 1
-        expiration_date = self.reference_date.replace(
-            month=next_month, day=next_day, year=next_year
-        )
+        expiration_date = date(month=next_month, day=next_day, year=next_year)
         return reference_date >= expiration_date
 
+    def get_consumed_movements(self) -> List[CreditMovement]:
+        movements = []
+        for use in self._usage_list:
+            if use.operation_type.lower() != "consume" or use.operation_id or use.id:
+                continue
+            movements.append(use)
+        return movements
+
     def get_consumed_value(self) -> int:
-        return 0
+        consumed_value = 0
+        for use in self.get_consumed_movements():
+            consumed_value += use.credit_movement
+        return consumed_value
 
     def get_expiration_date(self, reference_date: Optional[date] = None) -> date:
         # TODO: get_expiration_date must be implemented
