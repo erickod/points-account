@@ -137,7 +137,7 @@ class TestInMemoryCreditAccount(TestCase):
         assert recoveredAccount.get_balance() == 2
         assert account != recoveredAccount
 
-    def test_test_expire(self) -> None:
+    def test_expire(self) -> None:
         sut = InMemoryCreditAccountRepository.populate(
             get_account_rows(),
             get_credit_rows(),
@@ -156,4 +156,30 @@ class TestInMemoryCreditAccount(TestCase):
         assert (
             recoveredAccount._transactions[-1]._usage_list[-1].operation_type
             == "EXPIRE"
+        )
+
+    def test_ensure_expire_cannot_log_two_expire_operations(self) -> None:
+        sut = InMemoryCreditAccountRepository.populate(
+            get_account_rows(),
+            get_credit_rows(),
+            get_credit_log_rows(),
+            get_operation_log_row(),
+        )
+        account = sut.load_account_by_company_id(company_id)
+        account._reference_date = now
+        assert account
+        assert account.get_balance() == 10
+        account.expire()
+        account.expire()
+        sut.expire(account)
+        recoveredAccount = sut.load_account_by_company_id(company_id)
+        recoveredAccount._reference_date = now
+        assert account.get_balance() == 0
+        assert (
+            recoveredAccount._transactions[-1]._usage_list[-1].operation_type
+            == "EXPIRE"
+        )
+        assert (
+            recoveredAccount._transactions[-1]._usage_list[-2].operation_type
+            != "EXPIRE"
         )

@@ -94,6 +94,8 @@ class CreditAccount:
         if type(consumed_at) == datetime:
             consumed_at = consumed_at.date()
         for transaction in self._credit_state_list[::-1]:
+            if transaction.has_expired_operation():
+                continue
             movement = CreditMovement(
                 transaction.get_remaining_value(),
                 "EXPIRE",
