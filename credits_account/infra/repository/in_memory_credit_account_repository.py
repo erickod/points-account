@@ -184,8 +184,8 @@ class InMemoryCreditAccountRepository:
                     operation=use.operation_type,
                     account_id=account.get_id(),
                     id=use.operation_id,
-                    object_type="",  # TODO: find a way to get it from input
-                    object_id="",  # TODO: find a way to get it from input
+                    object_type="",
+                    object_id="",
                 )
                 self.operation_logs_rows[operation_log.id] = operation_log
 
@@ -218,8 +218,8 @@ class InMemoryCreditAccountRepository:
                     operation=use.operation_type,
                     account_id=account.get_id(),
                     id=use.operation_id,
-                    object_type="",  # TODO: find a way to get it from input
-                    object_id="",  # TODO: find a way to get it from input
+                    object_type=use.object_type,
+                    object_id=use.object_id,
                 )
                 self.operation_logs_rows[operation_log.id] = operation_log
 
@@ -254,7 +254,7 @@ class InMemoryCreditAccountRepository:
                     operation=use.operation_type,
                     account_id=account.get_id(),
                     id=use.operation_id,
-                    object_type="",  # TODO: find a way to get it from input
-                    object_id="",  # TODO: find a way to get it from input
+                    object_type="",
+                    object_id="",
                 )
                 self.operation_logs_rows[operation_log.id] = operation_log

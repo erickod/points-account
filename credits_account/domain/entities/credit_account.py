@@ -62,7 +62,12 @@ class CreditAccount:
         self._transactions.append(credit_state)
 
     def consume(
-        self, value: int, description: str, consumed_at: Optional[date] = None
+        self,
+        value: int,
+        description: str,
+        consumed_at: Optional[date] = None,
+        object_type: str = "",
+        object_id: str = "",
     ) -> None:
         if type(consumed_at) == datetime:
             consumed_at = consumed_at.date()
@@ -87,6 +92,7 @@ class CreditAccount:
                 None,
                 None,
             )
+            movement.set_movement_origin(object_type, object_id)
             total = not_consumed_credit
             if not_consumed_credit < 0:
                 break
@@ -107,6 +113,23 @@ class CreditAccount:
                 None,
             )
             transaction.register_movement(movement)
+
+    def refund(self, object_type: str, object_id: str) -> bool:
+        for transaction in self._credit_state_list:
+            for consume in transaction.get_consumed_movements():
+                if consume.object_type != object_type:
+                    continue
+                if consume.object_id != object_id:
+                    continue
+                movement = CreditMovement(
+                    consume.credit_movement,
+                    "REFUND",
+                    consume.operation_movement,
+                    "Seus créditos foram estornados",
+                    None,
+                    None,
+                )
+                transaction.register_movement(movement)
 
     def get_id(self) -> UUID:
         return self._id
