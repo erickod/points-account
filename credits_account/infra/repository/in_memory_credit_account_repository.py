@@ -1,19 +1,10 @@
-import pprint
-import uuid
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid1
 
-from credits_account.domain.entities.credit import (
-    Credit,
-    CreditMovement,
-    CreditTransaction,
-)
-from credits_account.domain.entities.credit_account import (
-    AddCreditOperation,
-    CreditAccount,
-)
+from credits_account.domain.entities.credit import CreditMovement, CreditTransaction
+from credits_account.domain.entities.credit_account import CreditAccount
 
 
 @dataclass
@@ -112,48 +103,6 @@ class InMemoryCreditAccountRepository:
         )
         self.credit_account_rows[account.company_id] = row
 
-    def update(self, account: CreditAccount) -> None:
-        ...
-        # now = datetime.now()
-        # account_row = self.credit_account_rows[account.company_id]
-        # account_row.balance = account.balance
-        # account_row.updated_at = now
-        # for credit in account.transactions:
-        #     credit_id = credit.id or uuid1()
-        #     credit_log_id = uuid1()
-        #     operation_log_id = uuid1()
-        #     self.credit_rows[credit_id] = CreditRow(
-        #         created_at=now,
-        #         updated_at=now,
-        #         initial_value=credit.initial_value,
-        #         consumed_value=credit.get_consumed_value(),
-        #         expiration_date=now,
-        #         type=credit.type,
-        #         account_id=account.get_id(),
-        #         id=credit_id,
-        #     )
-        #     self.operation_logs_rows[operation_log_id] = OperationLogRow(
-        #         created_at=now,
-        #         updated_at=now,
-        #         owner_id=uuid.uuid1(),
-        #         description="credit.get_transaction_description()",
-        #         total_movement=credit.get_consumed_value(),
-        #         operation="OPERATION",
-        #         account_id=account.get_id(),
-        #         id=operation_log_id,
-        #         # object_type=credit.get_consumer()[0],
-        #         # object_id=credit.get_consumer()[1],
-        #     )
-        #     self.credit_logs_rows[credit_id] = CreditLogRow(
-        #         created_at=now,
-        #         updated_at=now,
-        #         credit_moviment=credit.initial_value,
-        #         account_id=account.get_id(),
-        #         credit_id=credit_id,
-        #         operation_id=operation_log_id,
-        #         id=credit_log_id,
-        #     )
-
     def load_account_by_company_id(self, company_id: UUID) -> Optional[CreditAccount]:
         now = datetime.now()
         credit_account_row = self.credit_account_rows.get(company_id)
@@ -169,7 +118,6 @@ class InMemoryCreditAccountRepository:
                 contract_service_id=credit.contracted_service_id,
                 id=credit.id,
             )
-            print(">>>>>>>>", credit_state.get_remaining_value())
             if credit_state not in credits_movements:
                 credits_movements.append(credit_state)
             for clog in self.credit_logs_rows.values():
@@ -197,39 +145,49 @@ class InMemoryCreditAccountRepository:
 
     def add_credits(self, account: CreditAccount) -> None:
         now = datetime.now()
-        account_row = self.credit_account_rows[account.company_id]
-        account_row.balance = account.balance
-        account_row.updated_at = now
-        for movement in account.get_movements("ADD"):
-            operation: AddCreditOperation = movement
-            credit_id = movement.credit.id or uuid1()
-            self.credit_rows[credit_id] = CreditRow(
+        for credit in account._transactions:
+            if not credit.id:
+                credit.id = uuid1()
+            credit_row = CreditRow(
                 created_at=now,
                 updated_at=now,
-                initial_value=operation.credit.remaining_value,
-                consumed_value=operation.credit.get_consumed_value(),
-                expiration_date=now,
-                type=operation.credit.type,
-                account_id=account.company_id,
-                id=credit_id,
+                initial_value=credit.initial_value,
+                consumed_value=credit.get_consumed_value(),
+                expiration_date=credit.get_expiration_date(),
+                type=credit.type,
+                account_id=account.get_id(),
+                id=credit.id,
+                contracted_service_id=credit.contract_service_id,
             )
-
-    def consume_credits(self, account: CreditAccount) -> None:
-        now = datetime.now()
-        account_row = self.credit_account_rows[account.company_id]
-        account_row.balance = account.balance
-        account_row.updated_at = now
-        for movement in account.get_movements("ADD"):
-            operation: AddCreditOperation = movement
-            for credit in operation.credits:
-                credit_id = credit.id or uuid1()
-                self.credit_rows[credit_id] = CreditRow(
+            self.credit_rows[credit.id] = credit_row
+            for use in credit._usage_list:
+                if not use.id:
+                    use.id = uuid1()
+                if not use.operation_id:
+                    use.operation_id = uuid1()
+                credit_log = CreditLogRow(
                     created_at=now,
                     updated_at=now,
-                    initial_value=credit.remaining_value,
-                    consumed_value=credit.get_consumed_value(),
-                    expiration_date=now,
-                    type=credit.type,
-                    account_id=account.company_id,
-                    id=credit_id,
+                    credit_moviment=use.credit_movement,
+                    account_id=account.get_id(),
+                    credit_id=credit.id,
+                    operation_id=use.operation_id,
+                    id=use.id,
                 )
+                self.credit_logs_rows[credit_log.id] = credit_log
+                operation_log = OperationLogRow(
+                    created_at=now,
+                    updated_at=now,
+                    owner_id=uuid1(),  # TODO: find a way to get it from input
+                    description=use.operation_log,
+                    total_movement=use.operation_movement,
+                    operation=use.operation_type,
+                    account_id=account.get_id(),
+                    id=use.operation_id,
+                    object_type="",  # TODO: find a way to get it from input
+                    object_id="",  # TODO: find a way to get it from input
+                )
+                self.operation_logs_rows[operation_log.id] = operation_log
+
+    def consume_credits(self, account: CreditAccount) -> None:
+        ...

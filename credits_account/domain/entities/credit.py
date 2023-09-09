@@ -1,20 +1,7 @@
 import uuid
-from calendar import month
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date
 from typing import Any, List, Optional, Tuple
-
-
-@dataclass
-class Contract:
-    id: Optional[uuid.UUID]
-    __status: bool = False
-
-    @property
-    def is_active(self) -> bool:
-        if not self.__status:
-            return False
-        return self.__status
 
 
 @dataclass
@@ -28,80 +15,6 @@ class CreditLog:
 
     def __int__(self) -> int:
         return self.total_movimented
-
-
-@dataclass
-class Credit:
-    reference_date: date
-    account_id: uuid.UUID
-    initial_value: int
-    type: str
-    contract_service_id: Optional[uuid.UUID] = None
-    id: Optional[uuid.UUID] = None
-
-    def __post_init__(self) -> None:
-        self._usage_list: List[int] = []
-        if not self.reference_date:
-            self.reference_date = date.today()
-
-    def __key(self) -> Tuple[str, str]:
-        return ("" if not self.id else self.id.hex, str(self.reference_date))
-
-    def __hash__(self) -> int:
-        return hash(self.__key())
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, Credit):
-            return self.__key() == other.__key()
-        return False
-
-    def consume(
-        self,
-        value: int,
-        *,
-        ignore_is_expired_check: bool = False,
-        reference_date=date.today(),
-    ) -> int:
-        assert value >= 0, "The consume credit value should be greater than 0"
-        if self.is_expired(reference_date) and not ignore_is_expired_check:
-            raise ValueError(f"An expired credit cannot be consumed")
-
-        if self.get_remaining_value() >= value:
-            self._usage_list.append(value)
-            return 0
-        not_processed_value = value - self.get_remaining_value()
-        self._usage_list.append(self.get_remaining_value())
-        return not_processed_value
-
-    @property
-    def remaining_value(self) -> int:
-        return self.initial_value - sum(self._usage_list)
-
-    def is_expired(self, reference_date: date) -> bool:
-        next_day = self.reference_date.day
-        next_year = self.reference_date.year
-        if next_day > 28:
-            next_day = 28
-        next_month = self.reference_date.month + 1
-        if next_month >= 13:
-            next_month = 1
-            next_year += 1
-        expiration_date = self.reference_date.replace(
-            month=next_month, day=next_day, year=next_year
-        )
-        return reference_date >= expiration_date
-
-    def get_consumed_value(self) -> int:
-        return self.initial_value - self.get_remaining_value()
-
-    def get_expiration_date(self, reference_date: Optional[date] = None) -> date:
-        return self.reference_date
-
-    def get_expired_value(self, reference_date: date) -> int:
-        # TODO: rename to not_consumed_as_expired
-        if not self.is_expired(reference_date):
-            return 0
-        return self.initial_value - sum(self._usage_list)
 
 
 @dataclass
@@ -143,7 +56,6 @@ class CreditTransaction:
     id: Optional[uuid.UUID] = None
 
     def __post_init__(self) -> None:
-        # self._usage_list: List[int] = []
         self._usage_list: List[CreditMovement] = []
         if not self.reference_date:
             self.reference_date = date.today()
@@ -155,7 +67,7 @@ class CreditTransaction:
         return hash(self.__key())
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, Credit):
+        if isinstance(other, CreditTransaction):
             return self.__key() == other.__key()
         return False
 
@@ -195,9 +107,10 @@ class CreditTransaction:
         return reference_date >= expiration_date
 
     def get_consumed_value(self) -> int:
-        return self.initial_value - self.get_remaining_value()
+        return 0
 
     def get_expiration_date(self, reference_date: Optional[date] = None) -> date:
+        # TODO: get_expiration_date must be implemented
         return self.reference_date
 
     def get_expired_value(self, reference_date: date) -> int:

@@ -2,34 +2,23 @@ from copy import deepcopy
 from datetime import date
 from queue import Queue
 from typing import Any, List
-from uuid import UUID
+from uuid import UUID, uuid1
 
-from credits_account.domain.entities import Credit
-from credits_account.domain.entities.credit import CreditTransaction
-from credits_account.domain.entities.operations.add_operation import AddCreditOperation
-from credits_account.domain.entities.operations.consume_operation import (
-    ConsumeCreditOperation,
-)
-from credits_account.domain.entities.operations.movement_target import MovementTarget
-from credits_account.domain.entities.operations.operations import (
-    ExpireCreditOperation,
-    RefundCreditOperation,
-)
+from credits_account.domain.entities.credit import CreditMovement, CreditTransaction
 
 
 class CreditAccount:
     def __init__(
         self,
         company_id: UUID,
-        credit_state_list: List[CreditTransaction] = [],
+        credit_state_list: List[CreditTransaction],
         reference_date: date = date.today(),
     ) -> None:
         self._id = company_id
         self._fifo_queue = Queue()  # type:ignore
         self._credit_state_list: List[CreditTransaction] = credit_state_list
         self._reference_date: date = reference_date
-        self._transactions: List[Any] = []
-        self._consume_history: List[ConsumeCreditOperation] = []
+        self._transactions: List[CreditTransaction] = []
         self.__put_initial_balance_on_fifo_queue()
 
     @staticmethod
@@ -56,56 +45,36 @@ class CreditAccount:
             )
         return True
 
-    def add(self, operation: AddCreditOperation) -> None:
-        credit = operation.make_credit(self._reference_date, self.get_id())
-        if credit.account_id != self._id:
-            raise ValueError("the credit account don't match the group account")
-        self._fifo_queue.put(credit)
-        self._transactions.append(operation)
-
-    def consume(
-        self,
-        value: int,
-        operation_owner_id: UUID,
-        description: str = "",
-        object_type: str = "",
-        object_id: str = "",
-    ) -> None:
-        operation = ConsumeCreditOperation(value, operation_owner_id, description)
-        self.__ensure_account_has_enough_balance_to_consume(operation.value)
-        not_consumed_credit = operation.value
-        while not self._fifo_queue.empty():
-            credit = self._fifo_queue.get()
-            not_consumed_credit = credit.consume(
-                not_consumed_credit, reference_date=self._reference_date
+    def add(self, value: int, description: str, credit_type: str) -> None:
+        credit_state = CreditTransaction(
+            reference_date=self._reference_date,
+            account_id=self.get_id(),
+            initial_value=0,
+            type=credit_type,
+            contract_service_id=uuid1(),  # TODO: must receive a contracted_service as optional
+            id=None,  # TODO: must be generated in the repository layer
+        )
+        assert (
+            credit_state.account_id == self._id
+        ), "the credit account don't match the group account"
+        credit_state.register_movement(
+            CreditMovement(
+                value,
+                "ADD",
+                uuid1(),
+                value,
+                description,
+                uuid1(),
             )
-            operation.register_movement(credit)
-            operation.set_movement_target(MovementTarget(object_type, object_id))
-            if credit.remaining_value:
-                break
-        self._transactions.append(operation)
-
-    def refund(self, operation: RefundCreditOperation) -> None:
-        ...
-
-    def expire(self, operation: ExpireCreditOperation) -> None:
-        ...
-
-    def renew(self) -> None:
-        ...
+        )
+        self._credit_state_list.append(credit_state)
+        self._fifo_queue.put(credit_state)
+        self._transactions.append(credit_state)
 
     def get_id(self) -> UUID:
         return self._id
 
-    def get_movements(self, type: str) -> List[Any]:
-        return [
-            movement
-            for movement in self._transactions
-            if movement.type.lower() == type.lower()
-        ]
-
-    @property
-    def balance(self) -> int:
+    def get_balance(self) -> int:
         total = 0
         for transaction in self._credit_state_list:
             total += transaction.get_remaining_value()
