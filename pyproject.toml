@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "credits-account-review"
+version = "0.1.0"
+description = ""
+authors = ["Erick Duarte <erickod@gmail.com>"]
+readme = "README.md"
+packages = [{include = "credits_account_review"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytest = "^7.4.1"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.5.1"
+black = "^23.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
