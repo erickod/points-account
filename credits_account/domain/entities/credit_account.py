@@ -101,6 +101,14 @@ class CreditAccount:
             total += transaction.get_remaining_value()
         return total
 
+    def count_expired(self) -> int:
+        total = 0
+        for transaction in self._credit_state_list:
+            if not transaction.is_expired(self._reference_date):
+                continue
+            total += transaction.get_remaining_value()
+        return total
+
     @property
     def company_id(self) -> UUID:
         return self._id
