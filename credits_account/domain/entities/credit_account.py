@@ -133,5 +133,5 @@ class CreditAccount:
 
     def __str__(self) -> str:
         string = f"CreditAccount(id={self.get_id()}, "
-        string += f"balance={self.get_balance()}, consumed={0})"
+        string += f"balance={self.get_balance()})"
         return string
