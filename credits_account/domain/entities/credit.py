@@ -123,8 +123,16 @@ class CreditTransaction:
         return consumed_value
 
     def get_expiration_date(self, reference_date: Optional[date] = None) -> date:
-        # TODO: get_expiration_date must be implemented
-        return self.reference_date
+        reference_date = reference_date or self.reference_date
+        next_day = reference_date.day
+        next_year = reference_date.year
+        if next_day > 28:
+            next_day = 28
+        next_month = reference_date.month + 1
+        if next_month >= 13:
+            next_month = 1
+            next_year += 1
+        return date(month=next_month, day=next_day, year=next_year)
 
     def get_expired_value(self, reference_date: date) -> int:
         # TODO: rename to not_consumed_as_expired
