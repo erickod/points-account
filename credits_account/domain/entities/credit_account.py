@@ -90,6 +90,20 @@ class CreditAccount:
             if not_consumed_credit:
                 break
 
+    def expire(self, consumed_at: Optional[date] = None) -> None:
+        if type(consumed_at) == datetime:
+            consumed_at = consumed_at.date()
+        for transaction in self._credit_state_list[::-1]:
+            movement = CreditMovement(
+                transaction.get_remaining_value(),
+                "EXPIRE",
+                transaction.get_remaining_value(),
+                "Seus créditos expiraram",
+                None,
+                None,
+            )
+            transaction.register_movement(movement)
+
     def get_id(self) -> UUID:
         return self._id
 

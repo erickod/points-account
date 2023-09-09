@@ -66,3 +66,18 @@ class TestCreditAccount(TestCase):
         sut._reference_date = date(2022, 11, 1)
         self.assertEqual(sut.get_balance(), 0)
         self.assertEqual(sut.count_expired(), 20)
+
+    def test_ensure_expire_log_expire_movement(self) -> None:
+        sut = CreditAccount(
+            company_id=company_id,
+            credit_state_list=[],
+            reference_date=date(2022, 10, 1),
+        )
+        self.assertEqual(sut.get_balance(), 0)
+        sut.add(10, "Você adicionou créditos", "subscription")
+        sut._reference_date = date(2022, 11, 1)
+        self.assertEqual(sut.count_expired(), 10)
+        sut.expire()
+        self.assertEqual(
+            sut._credit_state_list[-1]._usage_list[-1].operation_type, "EXPIRE"
+        )
