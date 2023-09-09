@@ -97,6 +97,9 @@ class CreditTransaction:
         return self.initial_value + sum(usage_list or self._usage_list)
 
     def is_expired(self, reference_date: date) -> bool:
+        for transaction in self._usage_list:
+            if transaction.operation_type.lower() == "expire":
+                return True
         return reference_date >= self.get_expiration_date()
 
     def get_consumed_movements(self) -> List[CreditMovement]:

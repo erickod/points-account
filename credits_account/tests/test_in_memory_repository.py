@@ -136,3 +136,24 @@ class TestInMemoryCreditAccount(TestCase):
         recoveredAccount._reference_date = now
         assert recoveredAccount.get_balance() == 2
         assert account != recoveredAccount
+
+    def test_test_expire(self) -> None:
+        sut = InMemoryCreditAccountRepository.populate(
+            get_account_rows(),
+            get_credit_rows(),
+            get_credit_log_rows(),
+            get_operation_log_row(),
+        )
+        account = sut.load_account_by_company_id(company_id)
+        account._reference_date = now
+        assert account
+        assert account.get_balance() == 10
+        account.expire()
+        sut.expire(account)
+        recoveredAccount = sut.load_account_by_company_id(company_id)
+        recoveredAccount._reference_date = now
+        assert account.get_balance() == 0
+        assert (
+            recoveredAccount._transactions[-1]._usage_list[-1].operation_type
+            == "EXPIRE"
+        )

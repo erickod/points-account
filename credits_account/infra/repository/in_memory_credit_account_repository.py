@@ -223,3 +223,39 @@ class InMemoryCreditAccountRepository:
                     object_id="",  # TODO: find a way to get it from input
                 )
                 self.operation_logs_rows[operation_log.id] = operation_log
+
+    def expire(self, account: CreditAccount) -> None:
+        now = account._reference_date
+        for credit in account._transactions:
+            if not credit.id or not credit.is_expired(now):
+                continue
+            for use in credit._usage_list:
+                if use.operation_type != "EXPIRE":
+                    continue
+                if not use.id:
+                    use.id = uuid1()
+                if not use.operation_id:
+                    use.operation_id = uuid1()
+                credit_log = CreditLogRow(
+                    created_at=now,
+                    updated_at=now,
+                    credit_moviment=use.credit_movement,
+                    account_id=account.get_id(),
+                    credit_id=credit.id,
+                    operation_id=use.operation_id,
+                    id=use.id,
+                )
+                self.credit_logs_rows[credit_log.id] = credit_log
+                operation_log = OperationLogRow(
+                    created_at=now,
+                    updated_at=now,
+                    owner_id=uuid1(),  # TODO: find a way to get it from input
+                    description=use.operation_log,
+                    total_movement=use.operation_movement,
+                    operation=use.operation_type,
+                    account_id=account.get_id(),
+                    id=use.operation_id,
+                    object_type="",  # TODO: find a way to get it from input
+                    object_id="",  # TODO: find a way to get it from input
+                )
+                self.operation_logs_rows[operation_log.id] = operation_log
