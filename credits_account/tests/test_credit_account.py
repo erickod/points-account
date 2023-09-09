@@ -6,7 +6,7 @@ from credits_account.domain.entities.credit_account import CreditAccount
 company_id = uuid.uuid1()
 
 
-class TestInMemoryCreditAccount(TestCase):
+class TestCreditAccount(TestCase):
     def setUp(self) -> None:
         pass
 
