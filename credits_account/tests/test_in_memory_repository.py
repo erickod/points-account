@@ -84,3 +84,17 @@ class TestInMemoryCreditAccount(TestCase):
         recoveredAccount = sut.load_account_by_company_id(company_id)
         assert recoveredAccount.get_balance() == 110
         assert account != recoveredAccount
+
+    def test_ensure_can_handle_consume_credits_from_credit_account(self) -> None:
+        sut = InMemoryCreditAccountRepository.populate(
+            credit_account_rows, credit_rows, credit_log_rows, operation_log_row
+        )
+        account = sut.load_account_by_company_id(company_id)
+        assert account
+        assert account.get_balance() == 10
+        account.add(100, "Você adicionou créditos", "subscription")
+        assert account.get_balance() == 110
+        sut.add_credits(account)
+        recoveredAccount = sut.load_account_by_company_id(company_id)
+        assert recoveredAccount.get_balance() == 110
+        assert account != recoveredAccount

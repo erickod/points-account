@@ -73,7 +73,10 @@ class CreditAccount:
                 description,
                 uuid1(),
             )
-            transaction.register_movement(movement)
+            transaction.register_movement(
+                movement
+            )  # TODO: verify if it's needed because of reference system
+            self._transactions.append(transaction)
             if not_consumed_credit:
                 break
 
