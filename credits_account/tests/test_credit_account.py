@@ -14,6 +14,15 @@ class TestCreditAccount(TestCase):
         sut = CreditAccount(company_id=company_id, credit_state_list=[])
         self.assertEqual(sut.get_balance(), 0)
 
+    def test_ensure_it_raises_when_try_to_consume_when_has_no_available_balance(
+        self,
+    ) -> None:
+        sut = CreditAccount(company_id=company_id, credit_state_list=[])
+        self.assertEqual(sut.get_balance(), 0)
+        with self.assertRaises(ValueError):
+            sut.consume(1, "Você adicionou créditos")
+        self.assertEqual(sut.get_balance(), 0)
+
     def test_ensure_add_credits_updates_balance(self) -> None:
         sut = CreditAccount(company_id=company_id, credit_state_list=[])
         self.assertEqual(sut.get_balance(), 0)

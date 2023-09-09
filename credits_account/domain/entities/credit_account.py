@@ -31,7 +31,7 @@ class CreditAccount:
         return account
 
     def __ensure_account_has_enough_balance_to_consume(self, value: int) -> bool:
-        if value > self.balance or value <= 0:
+        if value > self.get_balance() or value <= 0:
             raise ValueError(
                 f"CreditAccount {self.get_id()} don't have enough balance to consume"
             )
@@ -63,6 +63,7 @@ class CreditAccount:
         self._transactions.append(credit_state)
 
     def consume(self, value: int, description: str) -> None:
+        self.__ensure_account_has_enough_balance_to_consume(value)
         for transaction in self._credit_state_list[::-1]:
             not_consumed_credit = transaction.consume(value)
             movement = CreditMovement(
