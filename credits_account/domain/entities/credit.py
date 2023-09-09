@@ -90,10 +90,12 @@ class CreditTransaction:
         not_processed_value = value - self.get_remaining_value(
             usage_list=local_usage_list
         )
-        self._usage_list.append(self.get_remaining_value(usage_list=local_usage_list))
+        remaining_value = self.get_remaining_value(usage_list=local_usage_list)
+        local_usage_list.append(remaining_value)
         return not_processed_value
 
     def get_remaining_value(self, usage_list: [CreditMovement] = []) -> int:
+        return sum(usage_list or self._usage_list)
         return self.initial_value + sum(usage_list or self._usage_list)
 
     def is_expired(self, reference_date: date) -> bool:

@@ -41,7 +41,7 @@ class CreditAccount:
         credit_state = CreditTransaction(
             creation_date=self._reference_date,
             account_id=self.get_id(),
-            initial_value=0,
+            initial_value=0,  # TODO: remove this param
             type=credit_type,
             contract_service_id=uuid1(),  # TODO: must receive a contracted_service as optional
             id=None,  # TODO: must be generated in the repository layer
@@ -68,9 +68,10 @@ class CreditAccount:
         if type(consumed_at) == datetime:
             consumed_at = consumed_at.date()
         self.__ensure_account_has_enough_balance_to_consume(value)
-        for transaction in self._credit_state_list[::-1]:
+        total = int(value)
+        for i, transaction in enumerate(self._credit_state_list[::-1]):
             not_consumed_credit = transaction.consume(
-                value,
+                total,
                 reference_date=consumed_at
                 or date(
                     self._reference_date.year,
@@ -78,17 +79,19 @@ class CreditAccount:
                     self._reference_date.day,
                 ),
             )
+            to_be_consumed = total - not_consumed_credit
             movement = CreditMovement(
-                value - not_consumed_credit,
+                to_be_consumed,
                 "CONSUME",
                 value,
                 description,
                 None,
                 None,
             )
-            transaction.register_movement(movement)
-            if not_consumed_credit:
+            total = not_consumed_credit
+            if not_consumed_credit < 0:
                 break
+            transaction.register_movement(movement)
 
     def expire(self, consumed_at: Optional[date] = None) -> None:
         if type(consumed_at) == datetime:
@@ -130,6 +133,6 @@ class CreditAccount:
         return self._id
 
     def __str__(self) -> str:
-        string = f"CreditAccount(id={self.id}, "
-        string += f"balance={self.balance}, consumed={self.consumed_value})"
+        string = f"CreditAccount(id={self.get_id()}, "
+        string += f"balance={self.get_balance()}, consumed={0})"
         return string

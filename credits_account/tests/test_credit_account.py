@@ -81,3 +81,15 @@ class TestCreditAccount(TestCase):
         self.assertEqual(
             sut._credit_state_list[-1]._usage_list[-1].operation_type, "EXPIRE"
         )
+
+    def test_add_and_consume_together(self) -> None:
+        sut = CreditAccount(
+            company_id=company_id,
+            credit_state_list=[],
+            reference_date=date(2022, 10, 1),
+        )
+        self.assertEqual(sut.get_balance(), 0)
+        sut.add(5, "Você adicionou créditos", "subscription")
+        sut.add(5, "Você adicionou créditos", "subscription")
+        sut.consume(6, "Você consumiu créditos")
+        assert sut.get_balance() == 4
