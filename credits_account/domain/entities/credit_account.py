@@ -1,7 +1,5 @@
-from copy import deepcopy
 from datetime import date
-from queue import Queue
-from typing import Any, List
+from typing import List
 from uuid import UUID, uuid1
 
 from credits_account.domain.entities.credit import CreditMovement, CreditTransaction
@@ -15,11 +13,9 @@ class CreditAccount:
         reference_date: date = date.today(),
     ) -> None:
         self._id = company_id
-        self._fifo_queue = Queue()  # type:ignore
         self._credit_state_list: List[CreditTransaction] = credit_state_list
         self._reference_date: date = reference_date
         self._transactions: List[CreditTransaction] = []
-        self.__put_initial_balance_on_fifo_queue()
 
     @staticmethod
     def restore(
@@ -33,10 +29,6 @@ class CreditAccount:
             reference_date=reference_date,
         )
         return account
-
-    def __put_initial_balance_on_fifo_queue(self) -> None:
-        for credit in deepcopy(self._credit_state_list):
-            self._fifo_queue.put(credit)
 
     def __ensure_account_has_enough_balance_to_consume(self, value: int) -> bool:
         if value > self.balance or value <= 0:
@@ -68,8 +60,22 @@ class CreditAccount:
             )
         )
         self._credit_state_list.append(credit_state)
-        self._fifo_queue.put(credit_state)
         self._transactions.append(credit_state)
+
+    def consume(self, value: int, description: str) -> None:
+        for transaction in self._credit_state_list[::-1]:
+            not_consumed_credit = transaction.consume(value)
+            movement = CreditMovement(
+                value - not_consumed_credit,
+                "CONSUME",
+                uuid1(),
+                value,
+                description,
+                uuid1(),
+            )
+            transaction.register_movement(movement)
+            if not_consumed_credit:
+                break
 
     def get_id(self) -> UUID:
         return self._id

@@ -19,3 +19,13 @@ class TestInMemoryCreditAccount(TestCase):
         self.assertEqual(sut.get_balance(), 0)
         sut.add(10, "Você adicionou créditos", "subscription")
         self.assertEqual(sut.get_balance(), 10)
+
+    def test_ensure_consume_credits_updates_balance(self) -> None:
+        sut = CreditAccount(company_id=company_id, credit_state_list=[])
+        self.assertEqual(sut.get_balance(), 0)
+        sut.add(100, "Você adicionou créditos", "subscription")
+        self.assertEqual(sut.get_balance(), 100)
+        sut.consume(5, "Você consumiu créditos")
+        self.assertEqual(sut.get_balance(), 95)
+        sut.consume(5, "Você consumiu créditos")
+        self.assertEqual(sut.get_balance(), 90)

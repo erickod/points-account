@@ -1,4 +1,5 @@
 import uuid
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, List, Optional, Tuple
@@ -81,16 +82,18 @@ class CreditTransaction:
         assert value >= 0, "The consume credit value should be greater than 0"
         if self.is_expired(reference_date) and not ignore_is_expired_check:
             raise ValueError(f"An expired credit cannot be consumed")
-
-        if self.get_remaining_value() >= value:
-            self._usage_list.append(value)
+        local_usage_list = deepcopy(self._usage_list)
+        if self.get_remaining_value(usage_list=local_usage_list) >= value:
+            local_usage_list.append(value)
             return 0
-        not_processed_value = value - self.get_remaining_value()
-        self._usage_list.append(self.get_remaining_value())
+        not_processed_value = value - self.get_remaining_value(
+            usage_list=local_usage_list
+        )
+        self._usage_list.append(self.get_remaining_value(usage_list=local_usage_list))
         return not_processed_value
 
-    def get_remaining_value(self) -> int:
-        return self.initial_value + sum(self._usage_list)
+    def get_remaining_value(self, usage_list: [CreditMovement] = []) -> int:
+        return self.initial_value + sum(usage_list or self._usage_list)
 
     def is_expired(self, reference_date: date) -> bool:
         next_day = self.reference_date.day
