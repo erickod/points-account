@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 from unittest import TestCase
 
 from credits_account.domain.entities.credit_account import CreditAccount
@@ -38,3 +39,15 @@ class TestCreditAccount(TestCase):
         self.assertEqual(sut.get_balance(), 95)
         sut.consume(5, "Você consumiu créditos")
         self.assertEqual(sut.get_balance(), 90)
+
+    def test_ensure_balance_dont_count_expired_credits(self) -> None:
+        sut = CreditAccount(
+            company_id=company_id,
+            credit_state_list=[],
+            reference_date=date(2022, 10, 1),
+        )
+        self.assertEqual(sut.get_balance(), 0)
+        sut.add(10, "Você adicionou créditos", "subscription")
+        self.assertEqual(sut.get_balance(), 10)
+        sut._reference_date = date(2022, 11, 1)
+        self.assertEqual(sut.get_balance(), 0)

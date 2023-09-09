@@ -144,7 +144,7 @@ class InMemoryCreditAccountRepository:
         return credit_account
 
     def add_credits(self, account: CreditAccount) -> None:
-        now = datetime.now()
+        now = account._reference_date
         for credit in account._transactions:
             if credit.id:
                 continue
@@ -191,7 +191,7 @@ class InMemoryCreditAccountRepository:
                 self.operation_logs_rows[operation_log.id] = operation_log
 
     def consume_credits(self, account: CreditAccount) -> None:
-        now = datetime.now()
+        now = account._reference_date
         for credit in account._transactions:
             if not credit.id or not credit.get_consumed_value():
                 continue

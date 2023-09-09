@@ -96,6 +96,8 @@ class CreditAccount:
     def get_balance(self) -> int:
         total = 0
         for transaction in self._credit_state_list:
+            if transaction.is_expired(self._reference_date):
+                continue
             total += transaction.get_remaining_value()
         return total
 

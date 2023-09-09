@@ -17,7 +17,7 @@ company_id = uuid1()
 credit_row_id = uuid1()
 credit_log_row_id = uuid1()
 operation_log_id = uuid1()
-now = datetime.datetime(2022, 9, 1)
+now = datetime.date(2022, 9, 1)
 
 
 def get_account_rows() -> List[CreditAccountRow]:
@@ -93,6 +93,7 @@ class TestInMemoryCreditAccount(TestCase):
             get_operation_log_row(),
         )
         account = sut.load_account_by_company_id(company_id)
+        account._reference_date = now
         assert account
         assert account.get_balance() == 10
 
@@ -104,12 +105,14 @@ class TestInMemoryCreditAccount(TestCase):
             get_operation_log_row(),
         )
         account = sut.load_account_by_company_id(company_id)
+        account._reference_date = now
         assert account
         assert account.get_balance() == 10
         account.add(100, "Você adicionou créditos", "subscription")
         assert account.get_balance() == 110
         sut.add_credits(account)
         recoveredAccount = sut.load_account_by_company_id(company_id)
+        recoveredAccount._reference_date = now
         assert recoveredAccount.get_balance() == 110
         assert account != recoveredAccount
 
@@ -121,6 +124,7 @@ class TestInMemoryCreditAccount(TestCase):
             get_operation_log_row(),
         )
         account = sut.load_account_by_company_id(company_id)
+        account._reference_date = now
         assert account
         assert account.get_balance() == 10
         account.consume(5, "Você consumiu créditos", consumed_at=now)
@@ -129,5 +133,6 @@ class TestInMemoryCreditAccount(TestCase):
         assert account.get_balance() == 2
         sut.consume_credits(account)
         recoveredAccount = sut.load_account_by_company_id(company_id)
+        recoveredAccount._reference_date = now
         assert recoveredAccount.get_balance() == 2
         assert account != recoveredAccount
