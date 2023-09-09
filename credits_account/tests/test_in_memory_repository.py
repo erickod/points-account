@@ -123,9 +123,9 @@ class TestInMemoryCreditAccount(TestCase):
         account = sut.load_account_by_company_id(company_id)
         assert account
         assert account.get_balance() == 10
-        account.consume(5, "Você consumiu créditos")
+        account.consume(5, "Você consumiu créditos", consumed_at=now)
         assert account.get_balance() == 5
-        account.consume(3, "Você consumiu créditos")
+        account.consume(3, "Você consumiu créditos", consumed_at=now)
         assert account.get_balance() == 2
         sut.consume_credits(account)
         recoveredAccount = sut.load_account_by_company_id(company_id)

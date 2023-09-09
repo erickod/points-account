@@ -50,7 +50,7 @@ class CreditMovement:
 
 @dataclass
 class CreditTransaction:
-    reference_date: date
+    creation_date: date
     account_id: uuid.UUID
     initial_value: int
     type: str
@@ -59,11 +59,11 @@ class CreditTransaction:
 
     def __post_init__(self) -> None:
         self._usage_list: List[CreditMovement] = []
-        if not self.reference_date:
-            self.reference_date = date.today()
+        if not self.creation_date:
+            self.creation_date = date.today()
 
     def __key(self) -> Tuple[str, str]:
-        return ("" if not self.id else self.id.hex, str(self.reference_date))
+        return ("" if not self.id else self.id.hex, str(self.creation_date))
 
     def __hash__(self) -> int:
         return hash(self.__key())
@@ -97,16 +97,7 @@ class CreditTransaction:
         return self.initial_value + sum(usage_list or self._usage_list)
 
     def is_expired(self, reference_date: date) -> bool:
-        next_day = self.reference_date.day
-        next_year = self.reference_date.year
-        if next_day > 28:
-            next_day = 28
-        next_month = self.reference_date.month + 1
-        if next_month >= 13:
-            next_month = 1
-            next_year += 1
-        expiration_date = date(month=next_month, day=next_day, year=next_year)
-        return reference_date >= expiration_date
+        return reference_date >= self.get_expiration_date()
 
     def get_consumed_movements(self) -> List[CreditMovement]:
         movements = []
@@ -122,13 +113,13 @@ class CreditTransaction:
             consumed_value += use.credit_movement
         return consumed_value
 
-    def get_expiration_date(self, reference_date: Optional[date] = None) -> date:
-        reference_date = reference_date or self.reference_date
-        next_day = reference_date.day
-        next_year = reference_date.year
+    def get_expiration_date(self, creation_date: Optional[date] = None) -> date:
+        creation_date = creation_date or self.creation_date
+        next_day = creation_date.day
+        next_year = creation_date.year
         if next_day > 28:
             next_day = 28
-        next_month = reference_date.month + 1
+        next_month = creation_date.month + 1
         if next_month >= 13:
             next_month = 1
             next_year += 1

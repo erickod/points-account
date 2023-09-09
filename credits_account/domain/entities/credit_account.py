@@ -1,5 +1,5 @@
-from datetime import date
-from typing import List
+from datetime import date, datetime
+from typing import List, Optional
 from uuid import UUID, uuid1
 
 from credits_account.domain.entities.credit import CreditMovement, CreditTransaction
@@ -39,7 +39,7 @@ class CreditAccount:
 
     def add(self, value: int, description: str, credit_type: str) -> None:
         credit_state = CreditTransaction(
-            reference_date=self._reference_date,
+            creation_date=self._reference_date,
             account_id=self.get_id(),
             initial_value=0,
             type=credit_type,
@@ -62,10 +62,22 @@ class CreditAccount:
         self._credit_state_list.append(credit_state)
         self._transactions.append(credit_state)
 
-    def consume(self, value: int, description: str) -> None:
+    def consume(
+        self, value: int, description: str, consumed_at: Optional[date] = None
+    ) -> None:
+        if type(consumed_at) == datetime:
+            consumed_at = consumed_at.date()
         self.__ensure_account_has_enough_balance_to_consume(value)
         for transaction in self._credit_state_list[::-1]:
-            not_consumed_credit = transaction.consume(value)
+            not_consumed_credit = transaction.consume(
+                value,
+                reference_date=consumed_at
+                or date(
+                    self._reference_date.year,
+                    self._reference_date.month,
+                    self._reference_date.day,
+                ),
+            )
             movement = CreditMovement(
                 value - not_consumed_credit,
                 "CONSUME",

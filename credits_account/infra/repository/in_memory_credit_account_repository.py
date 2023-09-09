@@ -111,7 +111,7 @@ class InMemoryCreditAccountRepository:
         credits_movements: List[CreditTransaction] = []
         for credit in self.credit_rows.values():
             credit_state = CreditTransaction(
-                reference_date=now.today(),
+                creation_date=credit.created_at,
                 account_id=credit_account_row.id,
                 initial_value=0,
                 type=credit.type,
