@@ -11,7 +11,6 @@ class TestCreditTransaction(TestCase):
         account_id = uuid1()
         sut = CreditTransaction(
             creation_date=creation_date,
-            initial_value=10,
             type="subscription",
             account_id=account_id,
         )
@@ -22,7 +21,6 @@ class TestCreditTransaction(TestCase):
         account_id = uuid1()
         sut = CreditTransaction(
             creation_date=creation_date,
-            initial_value=10,
             type="subscription",
             account_id=account_id,
         )

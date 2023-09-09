@@ -41,7 +41,6 @@ class CreditAccount:
         credit_state = CreditTransaction(
             creation_date=self._reference_date,
             account_id=self.get_id(),
-            initial_value=0,  # TODO: remove this param
             type=credit_type,
             contract_service_id=uuid1(),  # TODO: must receive a contracted_service as optional
             id=None,  # TODO: must be generated in the repository layer

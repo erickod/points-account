@@ -113,7 +113,6 @@ class InMemoryCreditAccountRepository:
             credit_state = CreditTransaction(
                 creation_date=credit.created_at,
                 account_id=credit_account_row.id,
-                initial_value=0,
                 type=credit.type,
                 contract_service_id=credit.contracted_service_id,
                 id=credit.id,
@@ -152,7 +151,7 @@ class InMemoryCreditAccountRepository:
             credit_row = CreditRow(
                 created_at=now,
                 updated_at=now,
-                initial_value=credit.initial_value,
+                initial_value=credit.get_remaining_value(),
                 consumed_value=credit.get_consumed_value(),
                 expiration_date=credit.get_expiration_date(),
                 type=credit.type,

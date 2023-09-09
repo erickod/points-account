@@ -52,7 +52,6 @@ class CreditMovement:
 class CreditTransaction:
     creation_date: date
     account_id: uuid.UUID
-    initial_value: int
     type: str
     contract_service_id: Optional[uuid.UUID] = None
     id: Optional[uuid.UUID] = None
@@ -96,7 +95,6 @@ class CreditTransaction:
 
     def get_remaining_value(self, usage_list: [CreditMovement] = []) -> int:
         return sum(usage_list or self._usage_list)
-        return self.initial_value + sum(usage_list or self._usage_list)
 
     def is_expired(self, reference_date: date) -> bool:
         return (
@@ -139,7 +137,7 @@ class CreditTransaction:
         # TODO: rename to not_consumed_as_expired
         if not self.is_expired(reference_date):
             return 0
-        return self.initial_value - sum(self._usage_list)
+        return sum(self._usage_list)
 
     def register_movement(self, movement: CreditMovement) -> None:
         self._usage_list.append(movement)
