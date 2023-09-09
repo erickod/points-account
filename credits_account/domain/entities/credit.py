@@ -6,19 +6,6 @@ from typing import Any, List, Optional, Tuple
 
 
 @dataclass
-class CreditLog:
-    total_movimented: int
-    movement_type: str
-    description: str
-    object_type: str = ""
-    object_id: str = ""
-    id: Optional[uuid.UUID] = None
-
-    def __int__(self) -> int:
-        return self.total_movimented
-
-
-@dataclass
 class CreditMovement:
     credit_movement: int
     operation_type: str
