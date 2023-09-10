@@ -142,3 +142,13 @@ class CreditTransaction:
 
     def register_movement(self, movement: CreditMovement) -> None:
         self._usage_list.append(movement)
+
+    def can_refund(self, object_type: str, object_id: str) -> bool:
+        for movement in self._usage_list:
+            if (
+                movement.operation_type.lower() == "refund"
+                and movement.object_type == object_type
+                and movement.object_id == object_id
+            ):
+                return False
+        return True

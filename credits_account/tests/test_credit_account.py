@@ -115,3 +115,27 @@ class TestCreditAccount(TestCase):
         assert sut.get_balance() == 4
         sut.refund(object_type=object_type, object_id=object_id)
         assert sut.get_balance() == 10
+
+    def test_refund_cannot_refund_the_same_object_twice_or_more(self) -> None:
+        object_type = "booking"
+        object_id = "51dc3bbc-216b-4531-b15f-a8912973b600"
+        sut = CreditAccount(
+            company_id=company_id,
+            credit_state_list=[],
+            reference_date=date(2022, 10, 1),
+        )
+        self.assertEqual(sut.get_balance(), 0)
+        sut.add(5, "Você adicionou créditos", "subscription")
+        sut.add(5, "Você adicionou créditos", "subscription")
+        assert sut.get_balance() == 10
+        sut.consume(
+            6,
+            "Você consumiu créditos",
+            object_type=object_type,
+            object_id=object_id,
+        )
+        assert sut.get_balance() == 4
+        sut.refund(object_type=object_type, object_id=object_id)
+        assert sut.get_balance() == 10
+        sut.refund(object_type=object_type, object_id=object_id)
+        assert sut.get_balance() == 10
