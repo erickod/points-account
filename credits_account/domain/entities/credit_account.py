@@ -132,6 +132,7 @@ class CreditAccount:
                     None,
                     None,
                 )
+                movement.set_movement_origin(object_type, object_id)
                 transaction.register_movement(movement)
 
     def get_id(self) -> UUID:
