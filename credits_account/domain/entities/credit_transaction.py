@@ -7,6 +7,9 @@ from credits_account.domain.entities.credit_movement import CreditMovement
 from credits_account.domain.entities.credit_movement.add_movement import (
     AddCreditMovement,
 )
+from credits_account.domain.entities.credit_movement.consume_moviment import (
+    ConsumeCreditMovement,
+)
 
 
 @dataclass
@@ -46,19 +49,16 @@ class CreditTransaction:
         if self.is_expired(reference_date) and not ignore_is_expired_check:
             raise ValueError(f"An expired credit cannot be consumed")
         if self.get_remaining_value() >= value:
-            movement = CreditMovement(
-                value, "CONSUME", value, description or "Você consumiu créditos"
+            movement = ConsumeCreditMovement(
+                value, value, description or "Você consumiu créditos"
             )
             movement.set_movement_origin(object_type, object_id)
             self._usage_list.append(movement)
             return 0
         not_processed_value = value - self.get_remaining_value()
         remaining_value = self.get_remaining_value()
-        movement = CreditMovement(
-            remaining_value,
-            "CONSUME",
-            remaining_value,
-            description or "Você consumiu créditos",
+        movement = ConsumeCreditMovement(
+            remaining_value, remaining_value, description or "Você consumiu créditos"
         )
         movement.set_movement_origin(object_type, object_id)
         self._usage_list.append(movement)
