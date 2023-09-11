@@ -107,17 +107,7 @@ class CreditAccount:
         if type(consumed_at) == datetime:
             consumed_at = consumed_at.date()
         for transaction in self._credit_state_list[::-1]:
-            if transaction.has_expired_operation():
-                continue
-            movement = CreditMovement(
-                transaction.get_remaining_value(),
-                "EXPIRE",
-                transaction.get_remaining_value(),
-                "Seus créditos expiraram",
-                None,
-                None,
-            )
-            transaction.register_movement(movement)
+            transaction.expire()
 
     def refund(self, object_type: str, object_id: str) -> bool:
         for transaction in self._credit_state_list:

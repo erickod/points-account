@@ -133,6 +133,19 @@ class CreditTransaction:
             movement.set_movement_origin(object_type, object_id)
             self.register_movement(movement)
 
+    def expire(self) -> None:
+        if self.has_expired_operation():
+            return
+        movement = CreditMovement(
+            self.get_remaining_value(),
+            "EXPIRE",
+            self.get_remaining_value(),
+            "Seus créditos expiraram",
+            None,
+            None,
+        )
+        self.register_movement(movement)
+
     def get_remaining_value(self, usage_list: [CreditMovement] = []) -> int:
         return sum(usage_list or self._usage_list)
 
