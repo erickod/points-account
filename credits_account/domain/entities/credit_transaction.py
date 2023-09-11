@@ -1,21 +1,13 @@
 import uuid
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
-from credits_account.domain.entities.credit_movement.add_movement import (
+from credits_account.domain.entities.credit_movement import (
     AddCreditMovement,
-)
-from credits_account.domain.entities.credit_movement.consume_moviment import (
     ConsumeCreditMovement,
-)
-from credits_account.domain.entities.credit_movement.expire_movement import (
     ExpireCreditMovement,
-)
-from credits_account.domain.entities.credit_movement.refund_movement import (
     RefundCreditMovement,
-)
-from credits_account.domain.entities.credit_movement.renew_movement import (
     RenewCreditMovement,
 )
 
