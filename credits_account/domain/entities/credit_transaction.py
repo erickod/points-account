@@ -4,6 +4,9 @@ from datetime import date
 from typing import List, Optional, Tuple
 
 from credits_account.domain.entities.credit_movement import CreditMovement
+from credits_account.domain.entities.credit_movement.add_movement import (
+    AddCreditMovement,
+)
 
 
 @dataclass
@@ -21,9 +24,7 @@ class CreditTransaction:
 
     def add(self, value: int, description: str) -> None:
         self.register_movement(
-            CreditMovement(
-                value,
-                "ADD",
+            AddCreditMovement(
                 value,
                 description,
                 None,
