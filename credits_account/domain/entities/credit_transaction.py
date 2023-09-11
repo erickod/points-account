@@ -80,7 +80,7 @@ class CreditTransaction:
     def renew(self) -> "CreditTransaction":
         add_movement = 0
         for movement in self._usage_list:
-            if movement.operation_type.lower() != "add":
+            if movement.operation_type.lower() not in ("add", "renew"):
                 continue
             add_movement += movement.credit_movement
         transaction = CreditTransaction(
