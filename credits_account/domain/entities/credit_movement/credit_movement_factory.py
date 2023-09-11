@@ -1,6 +1,6 @@
 import uuid
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Callable, Optional, Union
 
 from credits_account.domain.entities.credit_movement.add_movement import (
     AddCreditMovement,
@@ -18,6 +18,14 @@ from credits_account.domain.entities.credit_movement.renew_movement import (
     RenewCreditMovement,
 )
 
+SupportedMovements = Union[
+    AddCreditMovement,
+    ConsumeCreditMovement,
+    ExpireCreditMovement,
+    RefundCreditMovement,
+    RenewCreditMovement,
+]
+
 
 @dataclass
 class CreditMovementFactory:
@@ -28,7 +36,7 @@ class CreditMovementFactory:
     operation_id: Optional[uuid.UUID] = None
     id: Optional[uuid.UUID] = None
 
-    def make(self) -> Any:
+    def make(self) -> SupportedMovements:
         callable: Callable = getattr(self, self.operation_type.lower())
         return callable()
 
