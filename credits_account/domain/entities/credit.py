@@ -62,16 +62,16 @@ class CreditTransaction:
         if not self.creation_date:
             self.creation_date = date.today()
 
-    def __key(self) -> Tuple[str, str]:
-        return ("" if not self.id else self.id.hex, str(self.creation_date))
+    # def __key(self) -> Tuple[str, str]:
+    #     return ("" if not self.id else self.id.hex, str(self.creation_date))
 
-    def __hash__(self) -> int:
-        return hash(self.__key())
+    # def __hash__(self) -> int:
+    #     return hash(self.__key())
 
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, CreditTransaction):
-            return self.__key() == other.__key()
-        return False
+    # def __eq__(self, other: object) -> bool:
+    #     if isinstance(other, CreditTransaction):
+    #         return self.__key() == other.__key()
+    #     return False
 
     def consume(
         self,
@@ -133,8 +133,10 @@ class CreditTransaction:
             movement.set_movement_origin(object_type, object_id)
             self.register_movement(movement)
 
-    def expire(self) -> None:
-        if self.has_expired_operation():
+    def expire(self, at: Optional[date] = None) -> None:
+        if self.has_expired_operation() and self.is_expired(at or self.creation_date):
+            return
+        if not self.is_expired(at or self.creation_date):
             return
         movement = CreditMovement(
             self.get_remaining_value(),

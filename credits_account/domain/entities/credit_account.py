@@ -107,7 +107,7 @@ class CreditAccount:
         if type(consumed_at) == datetime:
             consumed_at = consumed_at.date()
         for transaction in self._credit_state_list[::-1]:
-            transaction.expire()
+            transaction.expire(self._reference_date)
 
     def refund(self, object_type: str, object_id: str) -> bool:
         for transaction in self._credit_state_list:
@@ -129,10 +129,11 @@ class CreditAccount:
     def get_id(self) -> UUID:
         return self._id
 
-    def get_balance(self) -> int:
+    def get_balance(self, at: Optional[date] = None) -> int:
+        at = at or self._reference_date
         total = 0
         for transaction in self._credit_state_list:
-            if transaction.is_expired(self._reference_date):
+            if transaction.is_expired(at):
                 continue
             total += transaction.get_remaining_value()
         return total

@@ -148,10 +148,11 @@ class TestInMemoryCreditAccount(TestCase):
         account._reference_date = now
         assert account
         assert account.get_balance() == 10
+        account._reference_date = date(2022, 10, 1)
         account.expire()
         sut.expire(account)
         recoveredAccount = sut.load_account_by_company_id(company_id)
-        recoveredAccount._reference_date = now
+        recoveredAccount._reference_date = date(2022, 10, 1)
         assert account.get_balance() == 0
         assert (
             recoveredAccount._transactions[-1]._usage_list[-1].operation_type
@@ -169,11 +170,12 @@ class TestInMemoryCreditAccount(TestCase):
         account._reference_date = now
         assert account
         assert account.get_balance() == 10
+        account._reference_date = date(2022, 10, 1)
         account.expire()
         account.expire()
         sut.expire(account)
         recoveredAccount = sut.load_account_by_company_id(company_id)
-        recoveredAccount._reference_date = now
+        account._reference_date = date(2022, 10, 1)
         assert account.get_balance() == 0
         assert (
             recoveredAccount._transactions[-1]._usage_list[-1].operation_type
