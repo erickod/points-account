@@ -3,3 +3,4 @@
 *__pycache__/*.pyc
 credits_account_old/**
 .vscode/
+main.py
