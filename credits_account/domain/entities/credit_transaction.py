@@ -10,6 +10,9 @@ from credits_account.domain.entities.credit_movement.add_movement import (
 from credits_account.domain.entities.credit_movement.consume_moviment import (
     ConsumeCreditMovement,
 )
+from credits_account.domain.entities.credit_movement.refund_movement import (
+    RefundCreditMovement,
+)
 from credits_account.domain.entities.credit_movement.renew_movement import (
     RenewCreditMovement,
 )
@@ -93,9 +96,8 @@ class CreditTransaction:
                 continue
             if not self.can_refund(object_type, object_id):
                 continue
-            movement = CreditMovement(
+            movement = RefundCreditMovement(
                 consume.credit_movement,
-                "REFUND",
                 consume.operation_movement,
                 "Seus créditos foram estornados",
                 None,
