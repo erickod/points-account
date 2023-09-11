@@ -2,51 +2,9 @@ import uuid
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
-
-@dataclass
-class CreditMovement:
-    credit_movement: int
-    operation_type: str
-    operation_movement: int
-    operation_log: str
-    operation_id: Optional[uuid.UUID] = None
-    id: Optional[uuid.UUID] = None
-
-    def __post_init__(self) -> None:
-        self.object_type: str = ""
-        self.object_id: str = ""
-        if (
-            self.operation_type.lower() in ("consume", "expire")
-            and self.credit_movement > 0
-        ):
-            self.credit_movement = self.credit_movement * -1
-            self.operation_movement = self.operation_movement * -1
-
-        if (
-            self.operation_type.lower() in ("add", "refund")
-            and self.credit_movement < 0
-        ):
-            self.credit_movement = self.credit_movement * -1
-            self.operation_movement = self.operation_movement * -1
-
-    def set_movement_origin(self, object_type, object_id) -> None:
-        assert self.operation_type.lower() in ("consume", "refund")
-        self.object_type = object_type
-        self.object_id = object_id
-
-    def __int__(self) -> int:
-        return self.credit_movement
-
-    def __add__(self, other: Any):
-        return self.credit_movement + other
-
-    def __radd__(self, other: Any):
-        return other + self.credit_movement
-
-    def __sub__(self, other: Any):
-        return self.credit_movement - other
+from credits_account.domain.entities.credit_movement import CreditMovement
 
 
 @dataclass
@@ -61,17 +19,6 @@ class CreditTransaction:
         self._usage_list: List[CreditMovement] = []
         if not self.creation_date:
             self.creation_date = date.today()
-
-    # def __key(self) -> Tuple[str, str]:
-    #     return ("" if not self.id else self.id.hex, str(self.creation_date))
-
-    # def __hash__(self) -> int:
-    #     return hash(self.__key())
-
-    # def __eq__(self, other: object) -> bool:
-    #     if isinstance(other, CreditTransaction):
-    #         return self.__key() == other.__key()
-    #     return False
 
     def consume(
         self,

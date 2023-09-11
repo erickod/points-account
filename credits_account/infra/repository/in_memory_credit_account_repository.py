@@ -3,7 +3,7 @@ from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid1
 
-from credits_account.domain.entities.credit import CreditMovement, CreditTransaction
+from credits_account.domain.entities import CreditMovement, CreditTransaction
 from credits_account.domain.entities.credit_account import CreditAccount
 
 

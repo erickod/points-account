@@ -2,7 +2,7 @@ from datetime import date
 from unittest import TestCase
 from uuid import uuid1
 
-from credits_account.domain.entities.credit import CreditTransaction
+from credits_account.domain.entities import CreditTransaction
 
 
 class TestCreditTransaction(TestCase):

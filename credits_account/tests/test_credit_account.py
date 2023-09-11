@@ -2,7 +2,7 @@ import uuid
 from datetime import date
 from unittest import TestCase
 
-from credits_account.domain.entities.credit import CreditMovement, CreditTransaction
+from credits_account.domain.entities import CreditMovement, CreditTransaction
 from credits_account.domain.entities.credit_account import CreditAccount
 
 company_id = uuid.uuid1()
