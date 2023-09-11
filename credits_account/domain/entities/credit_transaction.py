@@ -129,7 +129,7 @@ class CreditTransaction:
         )
         self.register_movement(movement)
 
-    def get_remaining_value(self, usage_list: [Any] = []) -> int:
+    def get_remaining_value(self, usage_list: List[SupportedMovements] = []) -> int:
         return sum(usage_list or self._usage_list)
 
     def is_expired(self, reference_date: Optional[date] = None) -> bool:
@@ -138,7 +138,7 @@ class CreditTransaction:
             reference_date >= self.get_expiration_date() or self.has_expired_operation()
         )
 
-    def get_consumed_movements(self) -> List[Any]:
+    def get_consumed_movements(self) -> List[ConsumeCreditMovement]:
         movements = []
         for use in self._usage_list:
             if use.operation_type.lower() != "consume" or use.operation_id or use.id:
@@ -176,7 +176,7 @@ class CreditTransaction:
             return 0
         return sum(self._usage_list)
 
-    def register_movement(self, movement: Any) -> None:
+    def register_movement(self, movement: SupportedMovements) -> None:
         self._usage_list.append(movement)
 
     def can_refund(self, object_type: str, object_id: str) -> bool:
