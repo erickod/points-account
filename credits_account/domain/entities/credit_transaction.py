@@ -1,4 +1,5 @@
 import uuid
+from calendar import monthrange
 from dataclasses import dataclass
 from datetime import date
 from typing import List, Optional, Tuple, Union
@@ -27,8 +28,12 @@ class CreditTransaction:
     type: str
     contract_service_id: Optional[uuid.UUID] = None
     id: Optional[uuid.UUID] = None
+    contract_service_creation_date: Optional[date] = None
 
     def __post_init__(self) -> None:
+        self.contract_service_creation_date = (
+            self.contract_service_creation_date or self.creation_date
+        )
         self._usage_list: List[SupportedMovements] = []
         if not self.creation_date:
             self.creation_date = date.today()
@@ -150,16 +155,17 @@ class CreditTransaction:
                 return True
         return False
 
-    def get_expiration_date(self, creation_date: Optional[date] = None) -> date:
-        creation_date = creation_date or self.creation_date
-        next_day = creation_date.day
-        next_year = creation_date.year
-        if next_day > 28:
-            next_day = 28
-        next_month = creation_date.month + 1
+    def get_expiration_date(self, at: Optional[date] = None) -> date:
+        at = at or self.creation_date
+        next_day = self.contract_service_creation_date.day
+        next_year = at.year
+        next_month = at.month + 1
         if next_month >= 13:
             next_month = 1
             next_year += 1
+        next_month_max_day = monthrange(next_year, next_month)[-1]
+        if next_day >= next_month_max_day:
+            next_day = next_month_max_day
         return date(month=next_month, day=next_day, year=next_year)
 
     def get_expired_value(self, reference_date: date) -> int:

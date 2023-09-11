@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime
+from sqlite3 import Date
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid1
 
@@ -56,11 +57,12 @@ class OperationLogRow:
 
 
 class InMemoryCreditAccountRepository:
-    def __init__(self) -> None:
+    def __init__(self, contracted_service_creation_date: Optional[Date] = None) -> None:
         self.credit_account_rows: Dict[UUID, CreditAccountRow] = {}
         self.credit_rows: Dict[UUID, CreditRow] = {}
         self.credit_logs_rows: Dict[UUID, CreditLogRow] = {}
         self.operation_logs_rows: Dict[UUID, OperationLogRow] = {}
+        self.contracted_service_creation_date = contracted_service_creation_date
 
     @staticmethod
     def populate(
@@ -117,6 +119,7 @@ class InMemoryCreditAccountRepository:
                 type=credit.type,
                 contract_service_id=credit.contracted_service_id,
                 id=credit.id,
+                contract_service_creation_date=self.contracted_service_creation_date,
             )
             if credit_state not in credits_movements:
                 credits_movements.append(credit_state)

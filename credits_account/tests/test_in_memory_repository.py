@@ -92,10 +92,13 @@ class TestInMemoryCreditAccount(TestCase):
             get_credit_log_rows(),
             get_operation_log_row(),
         )
+        sut.contracted_service_creation_date = now
         account = sut.load_account_by_company_id(company_id)
         account._reference_date = now
         assert account
         assert account.get_balance() == 10
+        recovered_credit = account._credit_state_list[0]
+        assert recovered_credit.contract_service_creation_date == now
 
     def test_ensure_can_handle_add_credits_from_credit_account(self) -> None:
         sut = InMemoryCreditAccountRepository.populate(
