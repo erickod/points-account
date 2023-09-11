@@ -1,14 +1,16 @@
 import uuid
 from dataclasses import dataclass
 from datetime import date
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
-from credits_account.domain.entities.credit_movement import CreditMovement
 from credits_account.domain.entities.credit_movement.add_movement import (
     AddCreditMovement,
 )
 from credits_account.domain.entities.credit_movement.consume_moviment import (
     ConsumeCreditMovement,
+)
+from credits_account.domain.entities.credit_movement.expire_movement import (
+    ExpireCreditMovement,
 )
 from credits_account.domain.entities.credit_movement.refund_movement import (
     RefundCreditMovement,
@@ -16,6 +18,14 @@ from credits_account.domain.entities.credit_movement.refund_movement import (
 from credits_account.domain.entities.credit_movement.renew_movement import (
     RenewCreditMovement,
 )
+
+SupportedMovements = Union[
+    AddCreditMovement,
+    ConsumeCreditMovement,
+    ExpireCreditMovement,
+    RefundCreditMovement,
+    RenewCreditMovement,
+]
 
 
 @dataclass
@@ -27,7 +37,7 @@ class CreditTransaction:
     id: Optional[uuid.UUID] = None
 
     def __post_init__(self) -> None:
-        self._usage_list: List[CreditMovement] = []
+        self._usage_list: List[SupportedMovements] = []
         if not self.creation_date:
             self.creation_date = date.today()
 
@@ -111,9 +121,7 @@ class CreditTransaction:
             return
         if not self.is_expired(at or self.creation_date):
             return
-        movement = CreditMovement(
-            self.get_remaining_value(),
-            "EXPIRE",
+        movement = ExpireCreditMovement(
             self.get_remaining_value(),
             "Seus créditos expiraram",
             None,
@@ -121,7 +129,7 @@ class CreditTransaction:
         )
         self.register_movement(movement)
 
-    def get_remaining_value(self, usage_list: [CreditMovement] = []) -> int:
+    def get_remaining_value(self, usage_list: [Any] = []) -> int:
         return sum(usage_list or self._usage_list)
 
     def is_expired(self, reference_date: Optional[date] = None) -> bool:
@@ -130,7 +138,7 @@ class CreditTransaction:
             reference_date >= self.get_expiration_date() or self.has_expired_operation()
         )
 
-    def get_consumed_movements(self) -> List[CreditMovement]:
+    def get_consumed_movements(self) -> List[Any]:
         movements = []
         for use in self._usage_list:
             if use.operation_type.lower() != "consume" or use.operation_id or use.id:
@@ -168,7 +176,7 @@ class CreditTransaction:
             return 0
         return sum(self._usage_list)
 
-    def register_movement(self, movement: CreditMovement) -> None:
+    def register_movement(self, movement: Any) -> None:
         self._usage_list.append(movement)
 
     def can_refund(self, object_type: str, object_id: str) -> bool:

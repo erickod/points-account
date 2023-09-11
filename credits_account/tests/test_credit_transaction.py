@@ -3,7 +3,9 @@ from unittest import TestCase
 from uuid import uuid1
 
 from credits_account.domain.entities import CreditTransaction
-from credits_account.domain.entities.credit_movement import CreditMovement
+from credits_account.domain.entities.credit_movement.add_movement import (
+    AddCreditMovement,
+)
 
 
 class TestCreditTransaction(TestCase):
@@ -49,7 +51,7 @@ class TestCreditTransaction(TestCase):
             type="subscription",
             account_id=account_id,
         )
-        sut.register_movement(CreditMovement(10, "ADD", 10, "Você adicionou créditos"))
+        sut.register_movement(AddCreditMovement(10, "Você adicionou créditos"))
         assert sut.get_remaining_value() == 10
         sut.consume(10, reference_date=creation_date)
         assert sut.get_remaining_value() == 0

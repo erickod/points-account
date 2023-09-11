@@ -3,8 +3,9 @@ from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid1
 
-from credits_account.domain.entities import CreditMovement, CreditTransaction
+from credits_account.domain.entities import CreditTransaction
 from credits_account.domain.entities.credit_account import CreditAccount
+from credits_account.domain.entities.credit_movement import CreditMovementFactory
 
 
 @dataclass
@@ -125,14 +126,14 @@ class InMemoryCreditAccountRepository:
                 for olog in self.operation_logs_rows.values():
                     if olog.id != clog.operation_id:
                         continue
-                    movement = CreditMovement(
+                    movement = CreditMovementFactory(
                         clog.credit_moviment,
                         olog.operation,
                         clog.operation_id,
                         olog.total_movement,
                         olog.description,
                         clog.id,
-                    )
+                    ).make()
                     credit_state.register_movement(movement)
 
         credit_account = CreditAccount.restore(

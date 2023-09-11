@@ -2,8 +2,11 @@ import uuid
 from datetime import date
 from unittest import TestCase
 
-from credits_account.domain.entities import CreditMovement, CreditTransaction
+from credits_account.domain.entities import CreditTransaction
 from credits_account.domain.entities.credit_account import CreditAccount
+from credits_account.domain.entities.credit_movement.add_movement import (
+    AddCreditMovement,
+)
 
 company_id = uuid.uuid1()
 
@@ -147,9 +150,7 @@ class TestCreditAccount(TestCase):
             contract_service_id=uuid.uuid1(),
         )
         expired_credit.register_movement(
-            CreditMovement(
-                5,
-                "ADD",
+            AddCreditMovement(
                 5,
                 "Você adicionou créditos",
                 operation_id=uuid.uuid1(),
