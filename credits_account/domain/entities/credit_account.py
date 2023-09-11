@@ -119,21 +119,7 @@ class CreditAccount:
 
     def refund(self, object_type: str, object_id: str) -> bool:
         for transaction in self._credit_state_list:
-            for consume in transaction.get_consumed_movements():
-                if consume.object_type != object_type or consume.object_id != object_id:
-                    continue
-                if not transaction.can_refund(object_type, object_id):
-                    continue
-                movement = CreditMovement(
-                    consume.credit_movement,
-                    "REFUND",
-                    consume.operation_movement,
-                    "Seus créditos foram estornados",
-                    None,
-                    None,
-                )
-                movement.set_movement_origin(object_type, object_id)
-                transaction.register_movement(movement)
+            transaction.refund(object_type, object_id)
 
     def renew(self) -> None:
         for credit in self._credit_state_list:

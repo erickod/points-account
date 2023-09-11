@@ -116,6 +116,23 @@ class CreditTransaction:
         )
         return transaction
 
+    def refund(self, object_type: str, object_id: str) -> None:
+        for consume in self.get_consumed_movements():
+            if consume.object_type != object_type or consume.object_id != object_id:
+                continue
+            if not self.can_refund(object_type, object_id):
+                continue
+            movement = CreditMovement(
+                consume.credit_movement,
+                "REFUND",
+                consume.operation_movement,
+                "Seus créditos foram estornados",
+                None,
+                None,
+            )
+            movement.set_movement_origin(object_type, object_id)
+            self.register_movement(movement)
+
     def get_remaining_value(self, usage_list: [CreditMovement] = []) -> int:
         return sum(usage_list or self._usage_list)
 
