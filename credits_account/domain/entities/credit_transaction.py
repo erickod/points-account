@@ -88,6 +88,7 @@ class CreditTransaction:
             account_id=self.account_id,
             type=self.type,
             contract_service_id=self.contract_service_id,
+            contract_service_creation_date=self.contract_service_creation_date,
         )
         transaction.register_movement(
             RenewCreditMovement(
