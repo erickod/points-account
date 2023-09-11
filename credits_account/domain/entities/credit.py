@@ -151,7 +151,8 @@ class CreditTransaction:
     def get_remaining_value(self, usage_list: [CreditMovement] = []) -> int:
         return sum(usage_list or self._usage_list)
 
-    def is_expired(self, reference_date: date) -> bool:
+    def is_expired(self, reference_date: Optional[date] = None) -> bool:
+        reference_date = reference_date or self.creation_date
         return (
             reference_date >= self.get_expiration_date() or self.has_expired_operation()
         )

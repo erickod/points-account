@@ -25,3 +25,15 @@ class TestCreditTransaction(TestCase):
             account_id=account_id,
         )
         assert sut.get_expiration_date() == date(2023, 1, 28)
+
+    def test_given_a_creation_date_a_transaction_must_be_expired_one_month_after(
+        self,
+    ) -> None:
+        creation_date = date(2022, 12, 28)
+        account_id = uuid1()
+        sut = CreditTransaction(
+            creation_date=creation_date,
+            type="subscription",
+            account_id=account_id,
+        )
+        assert sut.is_expired(date(2023, 1, 28))
