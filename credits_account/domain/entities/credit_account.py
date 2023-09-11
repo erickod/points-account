@@ -66,11 +66,6 @@ class CreditAccount:
         self.__ensure_account_has_enough_balance_to_consume(value)
         total = int(value)
         for transaction in self._credit_state_list[::-1]:
-            # TODO: create test to the below line
-            if transaction.get_remaining_value() < 1 or transaction.is_expired(
-                self._reference_date
-            ):
-                continue
             not_consumed_credit = transaction.consume(
                 total,
                 reference_date=consumed_at
