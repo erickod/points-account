@@ -94,6 +94,28 @@ class CreditTransaction:
         local_usage_list.append(remaining_value)
         return not_processed_value
 
+    def renew(self) -> "CreditTransaction":
+        add_movement = 0
+        for movement in self._usage_list:
+            if movement.operation_type.lower() != "add":
+                continue
+            add_movement += movement.credit_movement
+        transaction = CreditTransaction(
+            creation_date=self.get_expiration_date(),
+            account_id=self.account_id,
+            type=self.type,
+            contract_service_id=self.contract_service_id,
+        )
+        transaction.register_movement(
+            CreditMovement(
+                add_movement,
+                "ADD",
+                add_movement,
+                "Seus créditos foram renovados",
+            )
+        )
+        return transaction
+
     def get_remaining_value(self, usage_list: [CreditMovement] = []) -> int:
         return sum(usage_list or self._usage_list)
 

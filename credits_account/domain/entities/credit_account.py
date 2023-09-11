@@ -135,6 +135,19 @@ class CreditAccount:
                 movement.set_movement_origin(object_type, object_id)
                 transaction.register_movement(movement)
 
+    def renew(self) -> None:
+        for credit in self._credit_state_list:
+            if not credit.is_expired(self._reference_date):
+                continue
+            renewed_credit = credit.renew()
+            if (
+                renewed_credit in self._credit_state_list
+                or renewed_credit in self._transactions
+            ):
+                continue
+            self._transactions.append(renewed_credit)
+            self._credit_state_list.append(renewed_credit)
+
     def get_id(self) -> UUID:
         return self._id
 
