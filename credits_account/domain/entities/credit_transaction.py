@@ -19,6 +19,18 @@ class CreditTransaction:
         if not self.creation_date:
             self.creation_date = date.today()
 
+    def add(self, value: int, description: str) -> None:
+        self.register_movement(
+            CreditMovement(
+                value,
+                "ADD",
+                value,
+                description,
+                None,
+                None,
+            )
+        )
+
     def consume(
         self,
         value: int,

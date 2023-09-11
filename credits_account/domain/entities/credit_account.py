@@ -49,16 +49,7 @@ class CreditAccount:
         assert (
             credit_state.account_id == self._id
         ), "the credit account don't match the group account"
-        credit_state.register_movement(
-            CreditMovement(
-                value,
-                "ADD",
-                value,
-                description,
-                None,
-                None,
-            )
-        )
+        credit_state.add(value, description)
         self._credit_state_list.append(credit_state)
         self._transactions.append(credit_state)
 
