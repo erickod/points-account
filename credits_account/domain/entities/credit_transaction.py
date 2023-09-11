@@ -1,5 +1,4 @@
 import uuid
-from copy import deepcopy
 from dataclasses import dataclass
 from datetime import date
 from typing import List, Optional, Tuple
@@ -26,19 +25,30 @@ class CreditTransaction:
         *,
         ignore_is_expired_check: bool = False,
         reference_date=date.today(),
+        object_type: str = "",
+        object_id: str = "",
+        description: str = "Você consumiu créditos",
     ) -> int:
         assert value >= 0, "The consume credit value should be greater than 0"
         if self.is_expired(reference_date) and not ignore_is_expired_check:
             raise ValueError(f"An expired credit cannot be consumed")
-        local_usage_list = deepcopy(self._usage_list)
-        if self.get_remaining_value(usage_list=local_usage_list) >= value:
-            local_usage_list.append(value)
+        if self.get_remaining_value() >= value:
+            movement = CreditMovement(
+                value, "CONSUME", value, description or "Você consumiu créditos"
+            )
+            movement.set_movement_origin(object_type, object_id)
+            self._usage_list.append(movement)
             return 0
-        not_processed_value = value - self.get_remaining_value(
-            usage_list=local_usage_list
+        not_processed_value = value - self.get_remaining_value()
+        remaining_value = self.get_remaining_value()
+        movement = CreditMovement(
+            remaining_value,
+            "CONSUME",
+            remaining_value,
+            description or "Você consumiu créditos",
         )
-        remaining_value = self.get_remaining_value(usage_list=local_usage_list)
-        local_usage_list.append(remaining_value)
+        movement.set_movement_origin(object_type, object_id)
+        self._usage_list.append(movement)
         return not_processed_value
 
     def renew(self) -> "CreditTransaction":

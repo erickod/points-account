@@ -74,7 +74,7 @@ class CreditAccount:
             consumed_at = consumed_at.date()
         self.__ensure_account_has_enough_balance_to_consume(value)
         total = int(value)
-        for i, transaction in enumerate(self._credit_state_list[::-1]):
+        for transaction in self._credit_state_list[::-1]:
             # TODO: create test to the below line
             if transaction.get_remaining_value() < 1 or transaction.is_expired(
                 self._reference_date
@@ -88,21 +88,13 @@ class CreditAccount:
                     self._reference_date.month,
                     self._reference_date.day,
                 ),
+                object_type=object_type,
+                object_id=object_id,
+                description=description,
             )
-            to_be_consumed = total - not_consumed_credit
-            movement = CreditMovement(
-                to_be_consumed,
-                "CONSUME",
-                value,
-                description,
-                None,
-                None,
-            )
-            movement.set_movement_origin(object_type, object_id)
             total = not_consumed_credit
             if not_consumed_credit < 0:
                 break
-            transaction.register_movement(movement)
 
     def expire(self, consumed_at: Optional[date] = None) -> None:
         if type(consumed_at) == datetime:
