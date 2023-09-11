@@ -75,7 +75,9 @@ class CreditAccount:
         total = int(value)
         for i, transaction in enumerate(self._credit_state_list[::-1]):
             # TODO: create test to the below line
-            if transaction.get_remaining_value() < 1:
+            if transaction.get_remaining_value() < 1 or transaction.is_expired(
+                self._reference_date
+            ):
                 continue
             not_consumed_credit = transaction.consume(
                 total,
