@@ -10,6 +10,9 @@ from credits_account.domain.entities.credit_movement.add_movement import (
 from credits_account.domain.entities.credit_movement.consume_moviment import (
     ConsumeCreditMovement,
 )
+from credits_account.domain.entities.credit_movement.renew_movement import (
+    RenewCreditMovement,
+)
 
 
 @dataclass
@@ -77,9 +80,7 @@ class CreditTransaction:
             contract_service_id=self.contract_service_id,
         )
         transaction.register_movement(
-            CreditMovement(
-                add_movement,
-                "ADD",
+            RenewCreditMovement(
                 add_movement,
                 "Seus créditos foram renovados",
             )
