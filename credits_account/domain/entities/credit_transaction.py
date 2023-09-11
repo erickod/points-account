@@ -139,7 +139,7 @@ class CreditTransaction:
     def get_consumed_movements(self) -> List[ConsumeCreditMovement]:
         movements = []
         for use in self._usage_list:
-            if use.operation_type.lower() != "consume" or use.operation_id or use.id:
+            if use.operation_type.lower() != "consume":
                 continue
             movements.append(use)
         return movements
